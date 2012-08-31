@@ -1,7 +1,12 @@
 from xml.dom.minidom import parse
 import networkx as nx
+# import matplotlib.pyplot as plt
+import itertools
+import os
 import re
 
+
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
 INHERITANCE = 'inh'
 VARIABLE = 'var'
@@ -18,6 +23,14 @@ external_dependencies = set()
 G = nx.DiGraph()
 
 
+def build_graph():
+    files = os.listdir(DATA_DIR)
+
+    for f in files:
+        if f.endswith(".xml"):
+            build_graph_from_xml_report(os.path.join(DATA_DIR, f))
+
+
 def build_graph_from_xml_report(report_path):
     print 'Processing mxmlc link report: %s' % report_path
     dom = parse(report_path)
@@ -27,7 +40,7 @@ def build_graph_from_xml_report(report_path):
 
     dom.unlink()
 
-    print 'Graph built'
+    print 'Graph built: %d nodes and %d edges' % (G.number_of_nodes(), G.number_of_edges())
 
 
 def handle_scripts(scripts):
@@ -80,16 +93,12 @@ def analyze_graph():
     print 'Analyzing graph'
     modules = get_rot_module_nodes()
 
-    for source in modules:
-        for target in modules:
-            print '%s -> %s' % (source[0], target[0])
-            if source[0] != target[0]:
-                try:
-                    p = nx.shortest_path(G, source=source[0], target=target[0])
-                    print p
-                    print
-                except Exception:
-                    pass
+    for source_node, target_node in itertools.permutations(modules, 2):
+        source = source_node[0]
+        target = target_node[0]
+        if nx.has_path(G, source, target):
+            print '\n%s -> %s' % (source, target)
+            print nx.shortest_path(G, source=source, target=target)
 
 
 def get_rot_module_nodes():
@@ -97,5 +106,5 @@ def get_rot_module_nodes():
 
 
 if __name__ == "__main__":
-    build_graph_from_xml_report('SpcRotPricebookArticleMain.xml')
+    build_graph()
     analyze_graph()
