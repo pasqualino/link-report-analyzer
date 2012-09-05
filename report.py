@@ -1,4 +1,4 @@
-import link_report_analyzer
+from link_report_analyzer import build_graph
 import networkx as nx
 import itertools
 import re
@@ -14,18 +14,29 @@ application_re = re.compile('.*Main$')
 def analyze_graph(G):
     print 'Analyzing graph'
 
-    print '\nModule interdependencies:'
-    find_interdependendies(G, is_module)
+    print '\n\n----------------------------------------'
+    print 'module -> module:'
+    find_dependencies(G, is_module)
 
-    print '\nApplication interdependencies:'
-    find_interdependendies(G, is_application)
+    print '\n\n----------------------------------------'
+    print 'application -> application:'
+    find_dependencies(G, is_application)
+
+    print '\n\n----------------------------------------'
+    print 'application -> module:'
+    find_dependencies(G, is_application, is_module)
+
+    print '\n\n----------------------------------------'
+    print 'module -> application:'
+    find_dependencies(G, is_module, is_application)
 
 
-def find_interdependendies(G, filter_function):
-    modules = filter(filter_function, G.nodes())
+def find_dependencies(G, source_filter_function, target_filter_function=None):
+    source_nodes = filter(source_filter_function, G.nodes())
+    target_nodes = filter(target_filter_function, G.nodes()) if target_filter_function is not None else source_nodes
 
-    for source, target in itertools.permutations(modules, 2):
-        if nx.has_path(G, source, target):
+    for source, target in itertools.product(source_nodes, target_nodes):
+        if not source == target and nx.has_path(G, source, target):
             print '\n%s -> %s' % (source, target)
             print nx.shortest_path(G, source=source, target=target)
 
@@ -41,7 +52,7 @@ def is_application(node):
 def main():
     files = os.listdir(DATA_DIR)
 
-    G = link_report_analyzer.build_graph([os.path.join(DATA_DIR, f) for f in files])
+    G = build_graph([os.path.join(DATA_DIR, f) for f in files])
     analyze_graph(G)
 
 
