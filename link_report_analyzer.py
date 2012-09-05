@@ -1,7 +1,7 @@
 from xml.dom.minidom import parse
 import networkx as nx
 import re
-import time
+from time import time
 
 
 INHERITANCE = 'inh'
@@ -18,13 +18,12 @@ G = nx.DiGraph()
 
 
 def build_graph(files):
-    start_time = time.time() * 1000
+    start_time = time()
     for f in files:
         if f.endswith(".xml"):
             build_graph_from_xml_report(f)
 
-    end_time = time.time() * 1000
-    print 'Graph built in %d ms. %d nodes and %d edges' % (end_time - start_time, G.number_of_nodes(), G.number_of_edges())
+    print 'Graph built in %0.3fs. %d nodes and %d edges.' % (time() - start_time, G.number_of_nodes(), G.number_of_edges())
     return G
 
 

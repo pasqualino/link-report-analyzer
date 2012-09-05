@@ -1,8 +1,10 @@
 from link_report_analyzer import build_graph
-import networkx as nx
 import itertools
-import re
+import networkx as nx
 import os
+import re
+import sys
+from time import time
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
@@ -13,6 +15,7 @@ application_re = re.compile('.*Main$')
 
 def analyze_graph(G):
     print 'Analyzing graph'
+    start_time = time()
 
     print '\n\n----------------------------------------'
     print 'module -> module:'
@@ -29,6 +32,8 @@ def analyze_graph(G):
     print '\n\n----------------------------------------'
     print 'module -> application:'
     find_dependencies(G, is_module, is_application)
+
+    print '\nAnalysis done in %0.3fs.' % (time() - start_time)
 
 
 def find_dependencies(G, source_filter_function, target_filter_function=None):
@@ -57,4 +62,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, SystemExit):
+        print 'Interrupted!'
+        sys.exit(-1)
