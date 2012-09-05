@@ -33,12 +33,16 @@ def analyze_graph(G):
     print 'module -> application:'
     find_dependencies(G, is_module, is_application)
 
+    print '\n\n----------------------------------------'
+    list_dependencies(G, is_application)
+
     print '\nAnalysis done in %0.3fs.' % (time() - start_time)
 
 
 def find_dependencies(G, source_filter_function, target_filter_function=None):
     source_nodes = filter(source_filter_function, G.nodes())
-    target_nodes = filter(target_filter_function, G.nodes()) if target_filter_function is not None else source_nodes
+    target_nodes = filter(target_filter_function, G.nodes()) \
+            if target_filter_function is not None else source_nodes
 
     for source, target in itertools.product(source_nodes, target_nodes):
         if not source == target and nx.has_path(G, source, target):
@@ -46,12 +50,22 @@ def find_dependencies(G, source_filter_function, target_filter_function=None):
             print nx.shortest_path(G, source=source, target=target)
 
 
+def list_dependencies(G, source_filter_function):
+    source_nodes = filter(source_filter_function, G.nodes())
+
+    for n in source_nodes:
+        print '\n\n----------------------------------------'
+        print 'Dependencies of %s:' % n
+        for d in sorted(nx.dfs_successors(G, n)):
+            print d
+
+
 def is_module(node):
-    return not module_re.match(node) is None
+    return module_re.match(node) is not None
 
 
 def is_application(node):
-    return not application_re.match(node) is None
+    return application_re.match(node) is not None
 
 
 def main():
