@@ -21,6 +21,7 @@ def build_graph(files):
         if f.endswith(".xml"):
             build_graph_from_xml_report(f)
 
+    print 'Graph built: %d nodes and %d edges' % (G.number_of_nodes(), G.number_of_edges())
     return G
 
 
@@ -33,11 +34,8 @@ def build_graph_from_xml_report(report_path):
 
     dom.unlink()
 
-    print 'Graph built: %d nodes and %d edges' % (G.number_of_nodes(), G.number_of_edges())
-
 
 def handle_scripts(scripts):
-    print 'Handling script nodes'
     for script in scripts:
         script_name = get_script_name(script)
         if not is_third_party(script_name):
@@ -63,10 +61,8 @@ def get_id(node):
 
 
 def handle_external_defs(externals):
-    print 'Handling external references'
     for ext in externals.getElementsByTagName('ext'):
         external_dependencies.add(get_id(ext))
-    print 'Found %d external dependencies' % len(external_dependencies)
 
 
 def is_third_party(name):

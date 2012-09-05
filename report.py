@@ -7,12 +7,17 @@ import os
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
-rot_module_re = re.compile('.*Module$')
+module_re = re.compile('.*Module$')
+application_re = re.compile('.*Main$')
 
 
 def analyze_graph(G):
     print 'Analyzing graph'
-    modules = get_rot_module_nodes(G)
+    find_module_interdependendies(G)
+
+
+def find_module_interdependendies(G):
+    modules = filter(is_module, G.nodes())
 
     for source, target in itertools.permutations(modules, 2):
         if nx.has_path(G, source, target):
@@ -20,12 +25,8 @@ def analyze_graph(G):
             print nx.shortest_path(G, source=source, target=target)
 
 
-def get_rot_module_nodes(G):
-    return [n for n in G.nodes() if is_rot_module(n)]
-
-
-def is_rot_module(node):
-    return rot_module_re.match(node)
+def is_module(node):
+    return not module_re.match(node) is None
 
 
 def main():
